@@ -27,6 +27,7 @@ public:
 
   void marker_extraction();
   void show_prepared_data();
+  void extrinsic(Eigen::Matrix4f extrinsic) { extrinsic_ = extrinsic; }
 
 private:
   typedef vector<PointCloud> PointClusters;

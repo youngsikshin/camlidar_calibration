@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
   is_extracted_marker_ = false;
   is_segmented_points_ = false;
-  geometric_calib_ = new GeometricCalib(camlidar_bucket_, pinhole_model_, extrinsic_);
+//  geometric_calib_ = new GeometricCalib(camlidar_bucket_, pinhole_model_, extrinsic_);
 }
 
 MainWindow::~MainWindow()
@@ -119,6 +119,22 @@ void MainWindow::set_spinbox_values()
     ui->h_spinbox->setValue(h_);
 }
 
+void MainWindow::recalc_extrinsic()
+{
+    Eigen::AngleAxisf roll(r_*M_PI/180.0, Eigen::Vector3f::UnitX());
+    Eigen::AngleAxisf pitch(p_*M_PI/180.0, Eigen::Vector3f::UnitY());
+    Eigen::AngleAxisf heading(h_*M_PI/180.0, Eigen::Vector3f::UnitZ());
+
+    Eigen::Matrix3f rotation;
+    rotation = roll*pitch*heading;
+
+    extrinsic_.block<3, 3>(0, 0) = rotation;
+    extrinsic_(0, 3) = x_;
+    extrinsic_(1, 3) = y_;
+    extrinsic_(2, 3) = z_;
+    cerr << rotation << endl;
+}
+
 void MainWindow::on_start_stop_button_clicked()
 {
     if(!ui->start_stop_button->text().compare("Stop")) {
@@ -136,35 +152,49 @@ void MainWindow::on_start_stop_button_clicked()
 void MainWindow::on_x_spinbox_valueChanged(double arg1)
 {
     x_ = arg1;
+
+    recalc_extrinsic();
 }
 
 void MainWindow::on_y_spinbox_valueChanged(double arg1)
 {
     y_ = arg1;
+
+    recalc_extrinsic();
 }
 
 void MainWindow::on_z_spinbox_valueChanged(double arg1)
 {
     z_ = arg1;
+
+    recalc_extrinsic();
 }
 
 void MainWindow::on_r_spinbox_valueChanged(double arg1)
 {
     r_ = arg1;
+
+    recalc_extrinsic();
 }
 
 void MainWindow::on_p_spinbox_valueChanged(double arg1)
 {
     p_ = arg1;
+
+    recalc_extrinsic();
 }
 
 void MainWindow::on_h_spinbox_valueChanged(double arg1)
 {
     h_ = arg1;
+
+    recalc_extrinsic();
 }
 
 void MainWindow::on_preprocessing_button_clicked()
 {
+    geometric_calib_ = new GeometricCalib(camlidar_bucket_, pinhole_model_, extrinsic_);
+
     if(!is_extracted_marker_)
       geometric_calib_->marker_extraction();
 }

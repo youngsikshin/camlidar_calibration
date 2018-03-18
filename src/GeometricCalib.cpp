@@ -5,6 +5,8 @@ GeometricCalib::GeometricCalib(CamlidarBucket& camlidar_bucket, PinholeModel::Pt
 {
     pinhole_model_ = pinhole_model;
     extrinsic_ = extrinsic;
+
+    cerr << extrinsic_ << endl;
 }
 
 GeometricCalib::~GeometricCalib()
@@ -24,17 +26,21 @@ void GeometricCalib::marker_extraction()
                 iter = camlidar_bucket_.erase(iter);
                 marker_images_.erase(marker_images_.end());
             }
+
+            cerr << "[GeometricCalib]\t Run regiongrowing." << endl;
+
         }
         else {
+            cerr << "[GeometricCalib]\t Erase invalid data pair." << endl;
             iter = camlidar_bucket_.erase(iter);
         }
 
-        ++iter;
+        iter++;
 
     }
 
-    show_prepared_data();
-    calc_extrinsic();
+//    show_prepared_data();
+//    calc_extrinsic();
 
     cerr << marker_images_.size() << endl;
     cerr << pc_clusters_.size() << endl;
@@ -143,16 +149,21 @@ void GeometricCalib::calc_extrinsic()
 
     Eigen::Matrix3f cov = nc1 * nv1.transpose() + nc2 * nv2.transpose() + nc3 * nv3.transpose();
 
-    JacobiSVD<MatrixXf> svd(cov, ComputeThinU | ComputeThinV);
+//    JacobiSVD<MatrixXf> svd(cov, ComputeThinU | ComputeThinV);
 
     cerr << cov << endl << endl;
-    cerr << svd.matrixU() << endl;
+//    cerr << svd.matrixU() << endl;
 }
 
 bool GeometricCalib::aruco_marker_extraction(CamlidarData& camlidar_data)
 {
     // prepare image
     cv::Mat& image = camlidar_data.first;
+
+    cv::namedWindow("test");
+    cv::imshow("test", image);
+    cv::waitKey(1000);
+
     cv::Mat gray_image;
     image.convertTo(gray_image, CV_8UC1, 1.0);//, 1.0/255);
 
@@ -237,6 +248,8 @@ bool GeometricCalib::region_growing_segmentation(PointCloud& pc)
 
     std::vector <pcl::PointIndices> clusters;
     reg.extract (clusters);
+
+    cerr << "[GeometricCalib]\t cluster size : " << clusters.size() << endl;
 
     if(clusters.size() == 3) {
         // divide pc

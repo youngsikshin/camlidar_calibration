@@ -11,6 +11,8 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <Eigen/Geometry>
+
 #include <pcl/common/transforms.h>
 #include <pcl/search/search.h>
 #include <pcl/search/kdtree.h>
@@ -87,6 +89,7 @@ private:
 
   void set_pixmap();
   void set_spinbox_values();
+  void recalc_extrinsic();
 
 private slots:
   void get_camlidar();

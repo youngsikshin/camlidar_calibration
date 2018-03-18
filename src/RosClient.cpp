@@ -58,7 +58,8 @@ void RosClient::camlidar_callback(const sensor_msgs::ImageConstPtr& cam, const s
   pcl::fromROSMsg(*pc_ptr, pc);
 
   cv::Mat rgb;
-  cvtColor(cv_ptr->image, rgb, CV_BayerRG2BGR);
+//  cvtColor(cv_ptr->image, rgb, CV_BayerRG2BGR);
+  cv_ptr->image.copyTo(rgb);
 
   camlidar_data_ = CamlidarData(rgb, pc);
   emit camlidar_data_signal();
